@@ -3,14 +3,25 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "edge";
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      "User-Agent": "aistudio-build",
-    },
-  },
-});
+let aiClient: GoogleGenAI | null = null;
+
+function getAiClient(): GoogleGenAI {
+  if (!aiClient) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY environment variable is not configured. Please set the key in the settings panel.");
+    }
+    aiClient = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          "User-Agent": "aistudio-build",
+        },
+      },
+    });
+  }
+  return aiClient;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,6 +41,7 @@ Here is the current state of our live telemetry stream:
 
 Answer the user's question with direct reference to these metrics. Suggest micro-architectural optimizations or troubleshooting strategies if they ask about load, spikes, or system failures.`;
 
+    const ai = getAiClient();
     const response = await ai.models.generateContent({
       model: "gemini-3.5-flash",
       contents: message,
