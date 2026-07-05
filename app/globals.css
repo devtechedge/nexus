@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+/* High Contrast Accessibility Override Theme styling */
+.high-contrast-theme {
+  --bg-slate-950: #000000;
+  --bg-slate-900: #111111;
+  --text-slate-300: #ffffff;
+  --text-slate-400: #ffffff;
+  --text-slate-500: #ffff00;
+  --border-slate-800: #ffffff;
+}
+
+.high-contrast-theme main {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.high-contrast-theme header,
+.high-contrast-theme section,
+.high-contrast-theme div,
+.high-contrast-theme select,
+.high-contrast-theme input {
+  border-color: #ffffff !important;
+}
+
+.high-contrast-theme h1,
+.high-contrast-theme h2,
+.high-contrast-theme h3,
+.high-contrast-theme p,
+.high-contrast-theme span,
+.high-contrast-theme td,
+.high-contrast-theme button,
+.high-contrast-theme input,
+.high-contrast-theme select {
+  color: #ffffff !important;
+}
+
+.high-contrast-theme input,
+.high-contrast-theme select {
+  background-color: #000000 !important;
+  border: 2px solid #ffffff !important;
+}
+
+.high-contrast-theme select option {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
