@@ -129,6 +129,11 @@ export const WebGLCanvas: React.FC<WebGLCanvasProps> = ({ latestLog }) => {
   const cpuLoadRef = useRef(30.0);
   const tempLoadRef = useRef(42.0);
 
+  const isRotatingRef = useRef(isRotating);
+  useEffect(() => {
+    isRotatingRef.current = isRotating;
+  }, [isRotating]);
+
   useEffect(() => {
     if (latestLog) {
       cpuLoadRef.current = latestLog.hardware.cpuUsage;
@@ -146,18 +151,27 @@ export const WebGLCanvas: React.FC<WebGLCanvasProps> = ({ latestLog }) => {
       return;
     }
 
-    // High DPI adjustment
+    // High DPI adjustment via ResizeObserver on the canvas container element
+    const container = canvas.parentElement;
     const resizeCanvas = () => {
-      const displayWidth = canvas.clientWidth;
-      const displayHeight = canvas.clientHeight;
+      if (!container || !canvas) return;
+      const displayWidth = container.clientWidth;
+      const displayHeight = container.clientHeight;
       if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
         canvas.width = displayWidth;
         canvas.height = displayHeight;
         gl.viewport(0, 0, canvas.width, canvas.height);
       }
     };
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (container) {
+      resizeObserver = new ResizeObserver(() => {
+        resizeCanvas();
+      });
+      resizeObserver.observe(container);
+    }
     resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
 
     // Create shader utility helper
     const createShader = (gl: WebGLRenderingContext, type: number, source: string) => {
@@ -279,7 +293,7 @@ export const WebGLCanvas: React.FC<WebGLCanvasProps> = ({ latestLog }) => {
       lastTick = now;
 
       // Update rotation
-      if (isRotating) {
+      if (isRotatingRef.current) {
         rotationYRef.current += 0.2 * elapsed;
       }
 
@@ -385,7 +399,9 @@ export const WebGLCanvas: React.FC<WebGLCanvasProps> = ({ latestLog }) => {
 
     // Clean up to prevent WebGL GPU memory leaks
     return () => {
-      window.removeEventListener("resize", resizeCanvas);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
@@ -396,7 +412,7 @@ export const WebGLCanvas: React.FC<WebGLCanvasProps> = ({ latestLog }) => {
       gl.deleteShader(vs);
       gl.deleteShader(fs);
     };
-  }, [isRotating]);
+  }, []);
 
   // Orbit navigation handlers
   const handleMouseDown = (e: React.MouseEvent) => {

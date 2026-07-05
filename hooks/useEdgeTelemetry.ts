@@ -80,6 +80,9 @@ export function useEdgeTelemetry() {
     return () => {
       worker.terminate();
       URL.revokeObjectURL(workerUrl);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
     };
   }, [setLatestLog]);
 

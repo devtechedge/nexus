@@ -64,7 +64,7 @@ class TelemetryDB {
     const db = await this.init();
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(this.storeName, "readwrite");
-      const store = transaction.objectStore(transaction.objectStoreNames[0]);
+      const store = transaction.objectStore(this.storeName);
       
       const request = store.put(log);
       request.onsuccess = () => resolve();
@@ -76,7 +76,7 @@ class TelemetryDB {
     const db = await this.init();
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(this.storeName, "readwrite");
-      const store = transaction.objectStore(transaction.objectStoreNames[0]);
+      const store = transaction.objectStore(this.storeName);
 
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error);

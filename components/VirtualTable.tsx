@@ -21,8 +21,25 @@ export const VirtualTable: React.FC = () => {
   // Grid list height variables
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(400); // dynamic fallbacks
   const rowHeight = 44; // px
-  const viewportHeight = 400; // px
+
+  // ResizeObserver to handle canvas or container scale changes dynamically
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.contentRect.height > 0) {
+          setViewportHeight(entry.contentRect.height);
+        }
+      }
+    });
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   // Refresh logs from database
   const refreshLogs = useCallback(async () => {
@@ -323,13 +340,13 @@ export const VirtualTable: React.FC = () => {
         <div className="col-span-1 flex items-center cursor-pointer hover:text-white" onClick={() => handleSort("sequence")}>
           Seq <ArrowUpDown className="w-3 h-3 ml-1" />
         </div>
-        <div className="col-span-1.5 col-start-4 flex items-center cursor-pointer hover:text-white" onClick={() => handleSort("hardware.cpuUsage")}>
+        <div className="col-span-1 flex items-center cursor-pointer hover:text-white" onClick={() => handleSort("hardware.cpuUsage")}>
           CPU (%) <ArrowUpDown className="w-3 h-3 ml-1" />
         </div>
-        <div className="col-span-1.5 flex items-center cursor-pointer hover:text-white" onClick={() => handleSort("hardware.temperature")}>
+        <div className="col-span-1 flex items-center cursor-pointer hover:text-white" onClick={() => handleSort("hardware.temperature")}>
           Temp (°C) <ArrowUpDown className="w-3 h-3 ml-1" />
         </div>
-        <div className="col-span-2 flex items-center cursor-pointer hover:text-white" onClick={() => handleSort("traffic.endpoint")}>
+        <div className="col-span-3 flex items-center cursor-pointer hover:text-white" onClick={() => handleSort("traffic.endpoint")}>
           Endpoint <ArrowUpDown className="w-3 h-3 ml-1" />
         </div>
         <div className="col-span-1 flex items-center cursor-pointer hover:text-white" onClick={() => handleSort("traffic.method")}>
@@ -380,9 +397,9 @@ export const VirtualTable: React.FC = () => {
                   <div className="col-span-1 text-slate-400 font-semibold">#{data.sequence}</div>
                   
                   {/* CPU Progress */}
-                  <div className="col-span-1.5 col-start-4 flex items-center gap-2">
+                  <div className="col-span-1 flex items-center gap-1.5 truncate">
                     <span className="font-semibold">{data.hardware.cpuUsage}%</span>
-                    <div className="w-12 h-1.5 bg-slate-800 rounded-full overflow-hidden hidden sm:block">
+                    <div className="w-8 h-1 bg-slate-800 rounded-full overflow-hidden hidden xl:block">
                       <div
                         className={`h-full rounded-full ${
                           data.hardware.cpuUsage > 85 ? "bg-red-500 animate-pulse" : data.hardware.cpuUsage > 60 ? "bg-yellow-500" : "bg-teal-500"
@@ -393,10 +410,10 @@ export const VirtualTable: React.FC = () => {
                   </div>
 
                   {/* Temp */}
-                  <div className="col-span-1.5 text-slate-300">{data.hardware.temperature}°C</div>
+                  <div className="col-span-1 text-slate-300">{data.hardware.temperature}°C</div>
 
                   {/* Endpoint */}
-                  <div className="col-span-2 truncate text-slate-400 font-medium">
+                  <div className="col-span-3 truncate text-slate-400 font-medium">
                     {data.traffic.endpoint}
                   </div>
 
